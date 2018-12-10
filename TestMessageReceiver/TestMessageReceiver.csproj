@@ -13,7 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ServiceBusMessageForwarder\ServiceBusMessageForwarder.csproj" />
+    <ProjectReference Include="..\Messaging.Abstracts\Messaging.Abstracts.csproj" />
+    <ProjectReference Include="..\SbMessageForwarder\SbMessageForwarder.csproj" />
   </ItemGroup>
 
   <ItemGroup>

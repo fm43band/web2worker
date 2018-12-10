@@ -2,18 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Messaging.Abstracts;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 
 namespace ServiceBusMessageForwarder
 {
-    public enum MessageProcessResponse
-    {
-        Complete,
-        Abandon,
-        Dead
-    }
-    public class SbMessageReceiver<T> where T: class
+    
+    public class SbMessageReceiver<T> : IMessageReceiver<T> where T: class
     {
         private QueueClient queueClient;
 
@@ -24,7 +20,7 @@ namespace ServiceBusMessageForwarder
         }
 
         public void Receive(
-            Func<T, MessageProcessResponse> onProcess,
+            Func<Message<T>, MessageProcessingStatus> onProcess,
             Action<Exception> onError,
             Action onWait)
         {
@@ -45,16 +41,17 @@ namespace ServiceBusMessageForwarder
                     {
                         // Get message
                         var data = Encoding.UTF8.GetString(message.Body);
-                        T item = JsonConvert.DeserializeObject<T>(data);
+                        T payload = JsonConvert.DeserializeObject<T>(data);
+                        var id = message.MessageId;
 
                         // Process message
-                        var result = onProcess(item);
+                        var result = onProcess(new Message<T>{ Id = id, Payload = payload});
 
-                        if (result == MessageProcessResponse.Complete)
+                        if (result == MessageProcessingStatus.Complete)
                             await queueClient.CompleteAsync(message.SystemProperties.LockToken);
-                        else if (result == MessageProcessResponse.Abandon)
+                        else if (result == MessageProcessingStatus.Abandon)
                             await queueClient.AbandonAsync(message.SystemProperties.LockToken);
-                        else if (result == MessageProcessResponse.Dead)
+                        else if (result == MessageProcessingStatus.Dead)
                             await queueClient.DeadLetterAsync(message.SystemProperties.LockToken);
 
                         // Wait for next message

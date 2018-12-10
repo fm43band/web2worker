@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
+using Messaging.Abstracts;
 using ServiceBusMessageForwarder;
 
 namespace TestMessageReceiver
@@ -19,8 +20,8 @@ namespace TestMessageReceiver
 
             sbMsgReceiver.Receive(msg =>
             {
-                Console.WriteLine(msg);
-                return MessageProcessResponse.Complete;
+                Console.WriteLine($"Id: {msg.Id}. Payload: {msg.Payload}");
+                return MessageProcessingStatus.Complete;
             },
             ex => Console.WriteLine(ex.Message),
             () => Console.WriteLine("Waiting ..."));

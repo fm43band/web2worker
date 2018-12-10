@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Messaging.Abstracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.ServiceBus.Core;
@@ -14,7 +15,7 @@ namespace MessageForwarder.Controllers
     [ApiController]
     public class MessageGatewayController : ControllerBase
     {
-        private SbMessageSender<string> sender;
+        private IMessageSender<string> sender;
 
         public MessageGatewayController(IConfiguration configutation)
         {
@@ -41,7 +42,7 @@ namespace MessageForwarder.Controllers
 
         // POST: api/MessageGateway
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] string value)
+        public async Task<IActionResult> Post([FromBody]Message<string> value)
         {
             if (ModelState.IsValid)
             {
